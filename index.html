@@ -44,25 +44,30 @@
   <script>
     async function loadStatus() {
       try {
-        const res = await fetch("http://5.39.63.207:2242/status-json.xsl");
+        const res = await fetch("http://5.39.63.207:2242/status-json.xsl?nocache=" + Date.now());
         const data = await res.json();
 
-        // Mounts durchsuchen
         let mounts = data.icestats.source;
         if (!Array.isArray(mounts)) mounts = [mounts];
 
-        // Erst /stream nehmen
+        // Mount /stream suchen
         let stream = mounts.find(m => m.listenurl && m.listenurl.includes("/stream"));
 
-        // Wenn nicht vorhanden -> AutoDJ
-        if (!stream) {
-          stream = mounts.find(m => m.server_name && m.server_name.toLowerCase().includes("autodj"));
+        // prüfen ob der /stream echte Daten hat
+        const isStreamActive = stream && (stream.server_name || stream.title || stream.server_description);
+
+        let source;
+        if (isStreamActive) {
+          source = stream;
+        } else {
+          // fallback auf AutoDJ
+          source = mounts.find(m => m.listenurl && m.listenurl.includes("autodj"));
         }
 
-        if (stream) {
-          document.getElementById("dj").textContent = stream.server_name || "Unbekannt";
-          document.getElementById("song").textContent = stream.title || "Kein Titel";
-          document.getElementById("thema").textContent = stream.server_description || "Kein Thema";
+        if (source) {
+          document.getElementById("dj").textContent = source.server_name || "Unbekannt";
+          document.getElementById("song").textContent = source.title || "Kein Titel";
+          document.getElementById("thema").textContent = source.server_description || "Kein Thema";
         } else {
           document.getElementById("dj").textContent = "Offline";
           document.getElementById("song").textContent = "-";
@@ -73,9 +78,9 @@
       }
     }
 
-    // Sofort laden + alle 10 Sekunden aktualisieren
+    // sofort laden + alle 5 Sekunden aktualisieren
     loadStatus();
-    setInterval(loadStatus, 10000);
+    setInterval(loadStatus, 5000);
   </script>
 </body>
 </html>
