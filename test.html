@@ -48,7 +48,7 @@
 
     <!-- Audio Player -->
     <audio id="player" controls autoplay>
-      <source src="http://5.39.63.207:2242/live" type="audio/mpeg">
+      <source src="http://5.39.63.207:2242/stream" type="audio/mpeg">
       Dein Browser unterstützt kein Audio-Streaming.
     </audio>
   </div>
@@ -64,17 +64,17 @@
         let mounts = data.icestats.source;
         if (!Array.isArray(mounts)) mounts = [mounts];
 
-        // Live-Stream
-        let live = mounts.find(m => m.listenurl && m.listenurl.includes("/live"));
-        // AutoDJ
+        let stream = mounts.find(m => m.listenurl && m.listenurl.includes("/stream"));
         let autodj = mounts.find(m => m.listenurl && m.listenurl.includes("autodj"));
 
-        if (live) {
+        let isStreamActive = stream && (stream.server_name || stream.title || stream.server_description);
+
+        if (isStreamActive) {
           document.getElementById("status").textContent = "🟢 ON AIR";
           document.getElementById("status").className = "status live";
-          document.getElementById("dj").textContent = live.server_name || "Unbekannt";
-          document.getElementById("song").textContent = live.title || "Kein Titel";
-          document.getElementById("thema").textContent = live.server_description || "Kein Thema";
+          document.getElementById("dj").textContent = stream.server_name || "Unbekannt";
+          document.getElementById("song").textContent = stream.title || "Kein Titel";
+          document.getElementById("thema").textContent = stream.server_description || "Kein Thema";
         } else if (autodj) {
           document.getElementById("status").textContent = "🔵 AutoDJ";
           document.getElementById("status").className = "status autodj";
@@ -97,6 +97,12 @@
 
     loadStatus();
     setInterval(loadStatus, 5000);
+
+    // Audio Player AutoPlay Fix for iOS & Mobile
+    const player = document.getElementById('player');
+    document.body.addEventListener('click', () => {
+      player.play().catch(e => console.log('Autoplay verhindert:', e));
+    });
   </script>
 </body>
 </html>
