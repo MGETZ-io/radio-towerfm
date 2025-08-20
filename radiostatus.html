@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Radio On Air</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+      color: #fff;
+      text-align: center;
+      padding: 50px 20px;
+    }
+    .card {
+      background: #1c1c1c;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 480px;
+      margin: auto;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+    }
+    h1 {
+      color: #ff5722;
+      margin-bottom: 25px;
+      text-shadow: 0 0 12px #ff5722;
+    }
+    .status {
+      margin: 15px 0;
+      font-size: 1.4em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+    .live .status-dot { background: #0f0; }
+    .autodj .status-dot { background: #0af; }
+    .offline .status-dot { background: #f00; }
+    .label { font-weight: bold; margin-right: 5px; }
+    audio {
+      margin-top: 25px;
+      width: 100%;
+      border-radius: 12px;
+      outline: none;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+      background: #111;
+      transition: box-shadow 0.3s;
+    }
+    audio:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎵 Radio On Air</h1>
+    <div class="status live" id="status"><span class="status-dot"></span> Lade...</div>
+    <div><span class="label">DJ:</span> <span id="dj">-</span></div>
+    <div><span class="label">Song:</span> <span id="song">-</span></div>
+    <div><span class="label">Thema:</span> <span id="thema">-</span></div>
+
+    <!-- Audio Player -->
+    <audio id="player" controls autoplay>
+      <source src="http://5.39.63.207:2242/live" type="audio/mpeg">
+      Dein Browser unterstützt kein Audio-Streaming.
+    </audio>
+  </div>
+
+  <script>
+    async function loadStatus() {
+      try {
+        const url = "https://api.allorigins.win/get?url=" + encodeURIComponent("http://5.39.63.207:2242/status-json.xsl");
+        const res = await fetch(url);
+        const proxyData = await res.json();
+        const data = JSON.parse(proxyData.contents);
+
+        let mounts = data.icestats.source;
+        if (!Array.isArray(mounts)) mounts = [mounts];
+
+        const liveStream = mounts.find(m => m.listenurl && m.listenurl.includes("/live") && m.title);
+        const autodj = mounts.find(m => m.listenurl && m.listenurl.includes("/autodj"));
+
+        const statusEl = document.getElementById("status");
+
+        if (liveStream) {
+          statusEl.innerHTML = '<span class="status-dot"></span> ON AIR';
+          statusEl.className = 'status live';
+          document.getElementById("dj").textContent = liveStream.server_name || "Unbekannt";
+          document.getElementById("song").textContent = liveStream.title || "Kein Titel";
+          document.getElementById("thema").textContent = liveStream.server_description || "Kein Thema";
+        } else if (autodj) {
+          statusEl.innerHTML = '<span class="status-dot"></span> AutoDJ';
+          statusEl.className = 'status autodj';
+          document.getElementById("dj").textContent = "AutoDJ";
+          document.getElementById("song").textContent = autodj.title || "Kein Titel";
+          document.getElementById("thema").textContent = "TowerFM – Dein Tower Dein Radio";
+        } else {
+          statusEl.innerHTML = '<span class="status-dot"></span> Offline';
+          statusEl.className = 'status offline';
+          document.getElementById("dj").textContent = "-";
+          document.getElementById("song").textContent = "-";
+          document.getElementById("thema").textContent = "-";
+        }
+      } catch (err) {
+        console.error("Fehler beim Laden:", err);
+        const statusEl = document.getElementById("status");
+        statusEl.innerHTML = '<span class="status-dot"></span> Offline';
+        statusEl.className = 'status offline';
+        document.getElementById("dj").textContent = "-";
+        document.getElementById("song").textContent = "-";
+        document.getElementById("thema").textContent = "-";
+      }
+    }
+
+    loadStatus();
+    setInterval(loadStatus, 5000);
+
+
+
+
+
+
+    // Audio Player AutoPlay Fix for iOS & Mobile
+    const player = document.getElementById('player');
+    document.body.addEventListener('click', () => {
+      player.play().catch(e => console.log('Autoplay verhindert:', e));
+    });
+  </script>
+
+  <!-- Rainbow Buttons -->
+<style>
+  .rainbow-button {
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    background-size: 300% 300%;
+    animation: rainbow 3s linear infinite;
+    cursor: pointer;
+    margin: 5px;
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+
+  .rainbow-button:hover {
+    transform: scale(1.05);
+  }
+
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .button1 { background-image: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet); }
+  .button2 { background-image: linear-gradient(45deg, violet, indigo, blue, green, yellow, orange, red); }
+  .button3 { background-image: linear-gradient(45deg, pink, purple, cyan, lime, orange, red); }
+</style>
+
+<a href="/team.html" class="rainbow-button button1">Unser Team</a>
+<a href="/tracklist.html" class="rainbow-button button2">Trackliste</a>
+<a href="" class="rainbow-button button3">Unser Discord</a>
+
+</body>
+</html>
+

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Tracklist</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #ff6f61;
+    }
+    .tracklist-container {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .mount {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 20px;
+      min-width: 250px;
+      box-shadow: 0 0 10px rgba(255,111,97,0.5);
+    }
+    .mount h2 {
+      color: #ff6f61;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    li {
+      background: #2c2c2c;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 8px;
+      transition: transform 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    li:hover {
+      transform: scale(1.05);
+      background: #ff6f61;
+      color: #fff;
+    }
+    .current-live {
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 10px #00ff00;
+      position: relative;
+    }
+    .current-live::before, .current-live::after {
+      content: '▶ JETZT ZUHÖREN';
+      color: #00ff00;
+      font-weight: bold;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .current-live::before {
+      left: -150px;
+    }
+    .current-live::after {
+      right: -150px;
+    }
+    .scrolling {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll 8s linear infinite;
+    }
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .mascot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255,111,97,0.5);
+      max-width: 500px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .mascot img {
+      width: 120px;
+      margin-bottom: 10px;
+    }
+    .mascot p {
+      font-size: 16px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Aktuelle Tracks</h1>
+  <div class="tracklist-container">
+    <div class="mount" id="autodj">
+      <h2>AutoDJ</h2>
+      <ul id="autodj-list"></ul>
+    </div>
+    <div class="mount" id="live">
+      <h2>Live</h2>
+      <ul id="live-list"></ul>
+    </div>
+  </div>
+
+  <div class="mascot">
+    <img src="https://cdn.discordapp.com/attachments/1357763593256308825/1407859303271895060/ChatGPT_Image_21._Aug._2025_00_30_55.png?ex=68a7a2a6&is=68a65126&hm=24c398635942ec57a6c7d933dcbf6fa7112b0c79789524c5263266946c7d30f9&" alt="Maskottchen">
+    <p>Hallo! 👋<br>
+       Hier siehst du die Songs der beiden Streams: AutoDJ und Live.<br>
+       Alle abgespielten Songs werden darunter als Verlauf angezeigt.<br>
+       Wenn ein Titel zu lang ist, scrollt der Text automatisch.<br>
+       So behältst du immer den Überblick über alles!</p>
+  </div>
+
+  <script>
+    const autodjHistory = [];
+    const liveHistory = [];
+
+    async function fetchTracks() {
+      const response = await fetch('http://5.39.63.207:2242/status-json.xsl');
+      const data = await response.json();
+
+      const sources = data.icestats.source;
+      const autodjList = document.getElementById('autodj-list');
+      const liveList = document.getElementById('live-list');
+
+      sources.forEach(source => {
+        const title = source.title || 'Unbekannt';
+        if (source.listenurl.includes('/autodj')) {
+          if (!autodjHistory.includes(title)) autodjHistory.push(title);
+        } else if (source.listenurl.includes('/live')) {
+          if (!liveHistory.includes(title)) liveHistory.push(title);
+        }
+      });
+
+      autodjList.innerHTML = '';
+      autodjHistory.forEach(track => {
+        let li = document.createElement('li');
+        li.innerHTML = track.length > 20 ? `<span class='scrolling'>${track}</span>` : track;
+        autodjList.appendChild(li);
+      });
+
+      liveList.innerHTML = '';
+      liveHistory.forEach((track, index) => {
+        let li = document.createElement('li');
+        li.innerHTML = track.length > 20 ? `<span class='scrolling'>${track}</span>` : track;
+        if (index === 0) li.classList.add('current-live');
+        liveList.appendChild(li);
+      });
+    }
+
+    fetchTracks();
+    setInterval(fetchTracks, 5000);
+  </script>
+</body>
+</html>
