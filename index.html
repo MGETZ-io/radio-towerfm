@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Radio On Air</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+    }
+    .card {
+      background: #222;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    h1 {
+      color: #ff4500;
+      margin-bottom: 15px;
+    }
+    .label {
+      font-weight: bold;
+      color: #aaa;
+    }
+    .value {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎵 Radio On Air</h1>
+    <div><span class="label">DJ:</span> <span id="dj">-</span></div>
+    <div><span class="label">Song:</span> <span id="song">-</span></div>
+    <div><span class="label">Thema:</span> <span id="thema">-</span></div>
+  </div>
+
+  <script>
+    async function loadStatus() {
+      try {
+        const res = await fetch("http://5.39.63.207:2242/status-json.xsl");
+        const data = await res.json();
+
+        // Mounts durchsuchen
+        let mounts = data.icestats.source;
+        if (!Array.isArray(mounts)) mounts = [mounts];
+
+        // Erst /stream nehmen
+        let stream = mounts.find(m => m.listenurl && m.listenurl.includes("/stream"));
+
+        // Wenn nicht vorhanden -> AutoDJ
+        if (!stream) {
+          stream = mounts.find(m => m.server_name && m.server_name.toLowerCase().includes("autodj"));
+        }
+
+        if (stream) {
+          document.getElementById("dj").textContent = stream.server_name || "Unbekannt";
+          document.getElementById("song").textContent = stream.title || "Kein Titel";
+          document.getElementById("thema").textContent = stream.server_description || "Kein Thema";
+        } else {
+          document.getElementById("dj").textContent = "Offline";
+          document.getElementById("song").textContent = "-";
+          document.getElementById("thema").textContent = "-";
+        }
+      } catch (err) {
+        console.error("Fehler beim Laden:", err);
+      }
+    }
+
+    // Sofort laden + alle 10 Sekunden aktualisieren
+    loadStatus();
+    setInterval(loadStatus, 10000);
+  </script>
+</body>
+</html>
