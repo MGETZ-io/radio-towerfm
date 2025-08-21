@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GruWoBox Einsenden</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 500px; margin: 50px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #ff5722; color: #fff; border: none; cursor: pointer; }
+    .disabled { background: #aaa; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>GruWoBox Einsenden</h2>
+    <label>Grüße:</label>
+    <textarea id="gruesse" placeholder="Grüße hier eintragen"></textarea>
+    <label>Wünsche:</label>
+    <textarea id="wuensche" placeholder="Wünsche hier eintragen"></textarea>
+    <label>Voicemails:</label>
+    <textarea id="voicemails" placeholder="Voicemails hier eintragen"></textarea>
+    <button id="submitBtn" onclick="sendGruWo()">Senden</button>
+    <p id="msg"></p>
+</div>
+
+<script>
+let limits = {gruesse: 5, wuensche: 5, voicemails: 5};
+
+function sendGruWo() {
+    const g = document.getElementById('gruesse').value;
+    const w = document.getElementById('wuensche').value;
+    const v = document.getElementById('voicemails').value;
+
+    if(limits.gruesse<=0 && limits.wuensche<=0 && limits.voicemails<=0){
+        document.getElementById('msg').textContent = 'Es werden aktuell keine Wünsche entgegengenommen.';
+        document.getElementById('submitBtn').classList.add('disabled');
+        return;
+    }
+
+    if(g && limits.gruesse>0) limits.gruesse--;
+    if(w && limits.wuensche>0) limits.wuensche--;
+    if(v && limits.voicemails>0) limits.voicemails--;
+
+    document.getElementById('msg').textContent = 'Dein Eintrag wurde gesendet! (Hier MySQL-Insert einfügen)';
+    document.getElementById('gruesse').value = '';
+    document.getElementById('wuensche').value = '';
+    document.getElementById('voicemails').value = '';
+}
+</script>
+</body>
+</html>
