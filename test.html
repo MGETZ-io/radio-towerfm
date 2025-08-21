@@ -2,69 +2,68 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Icecast2 Player</title>
+  <title>Icecast Stream Player Test</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #121212;
-      color: #fff;
-      text-align: center;
-      padding: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f0f0f0;
     }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
     .player {
-      background: #1e1e1e;
-      padding: 20px;
+      background: #fff;
+      padding: 20px 30px;
       border-radius: 12px;
-      display: inline-block;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
     }
-
-    audio {
-      width: 300px;
-      outline: none;
-    }
-
-    #songtitle {
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
       margin-top: 15px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #00ffcc;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
     }
+    button:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-  <h1>Mein Icecast2-Stream</h1>
   <div class="player">
-    <audio id="radioPlayer" controls autoplay>
-      <source src="http://5.39.63.207:8650/stream" type="audio/mpeg">
-      Dein Browser unterstützt kein HTML5 Audio.
-    </audio>
-    <div id="songtitle">Lade Titel...</div>
+    <h2>Icecast Stream Player</h2>
+    <p>Stream: <strong>http://5.39.63.207:8650/stream</strong></p>
+    <button id="playBtn">Play / Pause</button>
   </div>
 
+  <!-- Howler.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
   <script>
-    async function fetchSongTitle() {
-      try {
-        const response = await fetch("http://5.39.63.207:8650/status-json.xsl");
-        const data = await response.json();
-        if (data.icestats && data.icestats.source) {
-          // Falls mehrere Mountpoints vorhanden sind
-          let source = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
-          document.getElementById("songtitle").innerText = source.title || "Kein Titel verfügbar";
-        }
-      } catch (e) {
-        document.getElementById("songtitle").innerText = "Fehler beim Laden der Titelinfos";
-      }
-    }
+    const streamUrl = "http://5.39.63.207:8650/stream";
+    const sound = new Howl({
+      src: [streamUrl],
+      html5: true, // WICHTIG für Streaming
+      format: ['mp3', 'ogg']
+    });
 
-    // Alle 10 Sekunden aktualisieren
-    fetchSongTitle();
-    setInterval(fetchSongTitle, 10000);
+    const btn = document.getElementById('playBtn');
+    let playing = false;
+
+    btn.addEventListener('click', () => {
+      if (!playing) {
+        sound.play();
+        playing = true;
+        btn.textContent = 'Pause';
+      } else {
+        sound.pause();
+        playing = false;
+        btn.textContent = 'Play';
+      }
+    });
   </script>
 </body>
 </html>
