@@ -139,7 +139,7 @@
     const liveHistory = [];
 
     async function fetchTracks() {
-      const response = await fetch('http://5.39.63.207:2242/status-json.xsl');
+      const response = await fetch('http://5.39.63.207:8650/status-json.xsl');
       const data = await response.json();
 
       const sources = data.icestats.source;

@@ -74,7 +74,7 @@
 
     <!-- Audio Player -->
     <audio id="player" controls autoplay>
-      <source src="http://5.39.63.207:2242/live" type="audio/mpeg">
+      <source src="http://5.39.63.207:8650/live" type="audio/mpeg">
       Dein Browser unterstützt kein Audio-Streaming.
     </audio>
   </div>
@@ -82,7 +82,7 @@
   <script>
     async function loadStatus() {
       try {
-        const url = "https://api.allorigins.win/get?url=" + encodeURIComponent("http://5.39.63.207:2242/status-json.xsl");
+        const url = "https://api.allorigins.win/get?url=" + encodeURIComponent("http://5.39.63.207:8650/status-json.xsl");
         const res = await fetch(url);
         const proxyData = await res.json();
         const data = JSON.parse(proxyData.contents);
@@ -173,8 +173,8 @@
   .button3 { background-image: linear-gradient(45deg, pink, purple, cyan, lime, orange, red); }
 </style>
 
-<a href="/team.html" class="rainbow-button button1">Unser Team</a>
-<a href="/tracklist.html" class="rainbow-button button2">Trackliste</a>
+<a href="/radio-towerfm/team.html" class="rainbow-button button1">Unser Team</a>
+<a href="/radio-towerfm/tracklist.html" class="rainbow-button button2">Trackliste</a>
 <a href="" class="rainbow-button button3">Unser Discord</a>
 
 </body>
