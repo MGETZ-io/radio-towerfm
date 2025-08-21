@@ -2,13 +2,41 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Radio-Stream</title>
+  <title>Icecast Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/muses-player@1.0.0/muses.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #121212;
+      color: #fff;
+    }
+    h1 {
+      margin-top: 40px;
+    }
+    #muses-container {
+      margin: 30px auto;
+      width: 300px;
+      height: 150px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Mein Stream</h1>
-  <audio controls autoplay>
-    <source src="http://5.39.63.207:8650/stream" type="audio/mpeg">
-    Dein Browser unterstützt kein HTML5 Audio.
-  </audio>
+  <h1>Mein Icecast-Stream</h1>
+  <div id="muses-container"></div>
+
+  <script>
+    Muses.init({
+      container: '#muses-container',
+      url: 'http://5.39.63.207:8650/stream',
+      codec: 'mp3',
+      autoplay: true,
+      width: 300,
+      height: 150,
+      volume: 70,
+      title: 'Live Radio',
+      skin: 'mcclean' // andere Skins: 'light', 'classic'
+    });
+  </script>
 </body>
 </html>
