@@ -62,15 +62,16 @@
           ? data.icestats.source
           : [data.icestats.source];
 
-        const liveSource = sources.find(s => s.listenurl?.includes("/live"));
-        const autoDJSource = sources.find(s => s.listenurl?.includes("/autodj"));
-        const source = liveSource || autoDJSource;
-
-        if (source && source.title) {
-          document.getElementById("info").textContent = `🎶 ${source.title}`;
-        } else {
-          document.getElementById("info").textContent = "Keine Songdaten verfügbar.";
+        // Zuerst Live suchen
+        let source = sources.find(s => s.listenurl?.includes("/live") && s.title);
+        // Falls Live keinen Titel hat, AutoDJ nehmen
+        if (!source) {
+          source = sources.find(s => s.listenurl?.includes("/autodj") && s.title);
         }
+
+        const songTitle = source && source.title ? source.title : "Keine Songdaten verfügbar.";
+
+        document.getElementById("info").textContent = `🎶 ${songTitle}`;
       } catch (error) {
         console.error("Fehler beim Abrufen der Daten:", error);
         document.getElementById("info").textContent = "Fehler beim Laden der Daten.";
