@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Live DJ & Song Info</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #1DB954;
+    }
+    #info {
+      margin-top: 30px;
+      font-size: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎧 Jetzt läuft auf deinem Stream</h1>
+  <div id="info">Lade Daten...</div>
+
+  <script>
+    async function fetchStreamInfo() {
+      const baseUrl = "http://5.39.63.207:8650/status-json.xsl";
+      try {
+        const response = await fetch(baseUrl);
+        const data = await response.json();
+
+        const liveSource = data?.icestats?.source?.find
+          ? data.icestats.source.find(s => s.listenurl?.includes("/live"))
+          : Array.isArray(data.icestats.source)
+            ? data.icestats.source.find(s => s.listenurl?.includes("/live"))
+            : data.icestats.source?.listenurl?.includes("/live")
+              ? data.icestats.source
+              : null;
+
+        const autoDJSource = data?.icestats?.source?.find
+          ? data.icestats.source.find(s => s.listenurl?.includes("/autodj"))
+          : Array.isArray(data.icestats.source)
+            ? data.icestats.source.find(s => s.listenurl?.includes("/autodj"))
+            : data.icestats.source?.listenurl?.includes("/autodj")
+              ? data.icestats.source
+              : null;
+
+        const source = liveSource || autoDJSource;
+
+        if (source && source.title) {
+          document.getElementById("info").textContent = `🎶 ${source.title}`;
+        } else {
+          document.getElementById("info").textContent = "Keine Songdaten verfügbar.";
+        }
+      } catch (error) {
+        console.error("Fehler beim Abrufen der Daten:", error);
+        document.getElementById("info").textContent = "Fehler beim Laden der Daten.";
+      }
+    }
+
+    fetchStreamInfo();
+    setInterval(fetchStreamInfo, 10000); // alle 10 Sekunden aktualisieren
+  </script>
+</body>
+</html>
