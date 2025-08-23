@@ -6,17 +6,40 @@
   <style>
     body {
       background-color: #121212;
-      color: #fff;
-      font-family: Arial, sans-serif;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
-      padding: 50px;
+      padding: 40px;
+      margin: 0;
     }
+
     h1 {
       color: #1DB954;
+      font-size: 2em;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
     }
+
     #info {
-      margin-top: 30px;
       font-size: 1.5em;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #1DB954;
+      display: inline-block;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { text-shadow: 0 0 5px #1DB954; }
+      50% { text-shadow: 0 0 20px #1DB954; }
+      100% { text-shadow: 0 0 5px #1DB954; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -26,27 +49,21 @@
 
   <script>
     async function fetchStreamInfo() {
-      const baseUrl = "http://5.39.63.207:8650/status-json.xsl";
+      const targetUrl = encodeURIComponent("http://5.39.63.207:8650/status-json.xsl");
+      const proxyUrl = `https://api.allorigins.win/raw?url=${targetUrl}`;
+
       try {
-        const response = await fetch(baseUrl);
-        const data = await response.json();
+        const response = await fetch(proxyUrl);
+        const text = await response.text();
+        const jsonMatch = text.match(/{.*}/s);
+        const data = JSON.parse(jsonMatch[0]);
 
-        const liveSource = data?.icestats?.source?.find
-          ? data.icestats.source.find(s => s.listenurl?.includes("/live"))
-          : Array.isArray(data.icestats.source)
-            ? data.icestats.source.find(s => s.listenurl?.includes("/live"))
-            : data.icestats.source?.listenurl?.includes("/live")
-              ? data.icestats.source
-              : null;
+        const sources = Array.isArray(data.icestats.source)
+          ? data.icestats.source
+          : [data.icestats.source];
 
-        const autoDJSource = data?.icestats?.source?.find
-          ? data.icestats.source.find(s => s.listenurl?.includes("/autodj"))
-          : Array.isArray(data.icestats.source)
-            ? data.icestats.source.find(s => s.listenurl?.includes("/autodj"))
-            : data.icestats.source?.listenurl?.includes("/autodj")
-              ? data.icestats.source
-              : null;
-
+        const liveSource = sources.find(s => s.listenurl?.includes("/live"));
+        const autoDJSource = sources.find(s => s.listenurl?.includes("/autodj"));
         const source = liveSource || autoDJSource;
 
         if (source && source.title) {
